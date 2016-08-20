@@ -1,0 +1,4 @@
+gom 'github.com/pkg/errors'
+gom 'github.com/fatih/structs'
+gom 'github.com/achiku/mergo'
+gom 'github.com/AdrianLungu/decimal'
