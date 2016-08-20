@@ -2,7 +2,6 @@ package mergestruct
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -23,16 +22,17 @@ var zeroTime = time.Time{}
 var zeroDecimal = decimal.NewFromFloat(0)
 
 var mergeFunc = func(dst, src reflect.Value) {
-	log.Println(getStructPath(dst))
 	switch {
 	case getStructPath(dst) == timePkgPath:
-		t, _ := dst.Interface().(time.Time)
-		if t == zeroTime {
+		dt, _ := dst.Interface().(time.Time)
+		st, _ := src.Interface().(time.Time)
+		if dt == zeroTime || st != zeroTime {
 			dst.Set(src)
 		}
 	case getStructPath(dst) == decimalPkgPath:
-		t, _ := dst.Interface().(decimal.Decimal)
-		if t.Cmp(zeroDecimal) == 0 {
+		dd, _ := dst.Interface().(decimal.Decimal)
+		sd, _ := src.Interface().(decimal.Decimal)
+		if dd.Cmp(zeroDecimal) == 0 || sd.Cmp(zeroDecimal) != 0 {
 			dst.Set(src)
 		}
 	}
@@ -41,15 +41,17 @@ var mergeFunc = func(dst, src reflect.Value) {
 func TestMerge(t *testing.T) {
 	pNum := decimal.NewFromFloat(100.112)
 	e := &Event{
-		ID:      int64(rand.Intn(10000)),
-		Name:    "critical event",
-		Number:  decimal.NewFromFloat(100.01123),
-		PNumber: &pNum,
+		ID:        int64(rand.Intn(10000)),
+		Name:      "critical event",
+		Number:    decimal.NewFromFloat(100.01123),
+		PNumber:   &pNum,
+		EmittedAt: time.Now().AddDate(1, 0, 0),
 	}
 
 	defaultEvent := &Event{
-		ID:   10,
-		Name: "default event",
+		ID:     10,
+		Name:   "default event",
+		Number: decimal.NewFromFloat(2),
 		Detail: EventDetail{
 			UserID:      1,
 			Description: "test desc",
